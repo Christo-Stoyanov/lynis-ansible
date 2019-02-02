@@ -1,0 +1,9 @@
+---
+# This playbook deploys lynis enterprise to an UBUNTU / DEBIAN Server.
+
+- name: install lynis plus plugins and daily cron
+  hosts: all
+  become: yes
+  become_user: root
+  roles: 
+    - lynis

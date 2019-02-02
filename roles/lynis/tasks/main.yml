@@ -1,0 +1,73 @@
+---
+# This playbook contains lynis plays that will be run on all nodes.
+
+- name: "Cleaning apt sourcelists for lynis, path /etc/apt/sources.list.d/cisofy-lynis.list/"
+  file:
+    state: absent
+    path: "/etc/apt/sources.list.d/cisofy-lynis.list"
+  tags: LYNIS
+  when: lynis_reset_repo is defined and lynis_reset_repo==true
+
+### installing dependencies for lynis
+- name: Update apt packages
+  apt:
+   name: apt-transport-https
+   state: latest
+   update_cache: yes
+
+### configure apt repo
+- name: Adding lynis-key by id from a keyserver
+  apt_key:
+   keyserver: keyserver.ubuntu.com
+   id: C80E383C3DE9F082E01391A0366C67DE91CA5D5F
+  tags: LYNIS   
+    
+- name: Adding Lynis software repository    
+  lineinfile:
+   path: '/etc/apt/sources.list.d/cisofy-lynis.list' 
+   line: "deb https://packages.cisofy.com/customers/{{ lynis_license_key }}/lynis/deb/ stable main" 
+   state: present 
+   mode: u=rw,g=r,o=r 
+   create: yes
+   owner: root
+  tags: LYNIS   
+
+### INSTALLATION
+
+- name: Installing latest {{ lynis_main_package_name }} and {{ lynis_plugin_package_name }} from apt
+  apt: 
+   name: ['{{ lynis_main_package_name }}', '{{ lynis_plugin_package_name }}'] 
+   state: latest 
+   force: no 
+   install_recommends: yes 
+   update_cache: yes
+  register: lynis_isinstalled
+  tags: LYNIS 
+
+
+## CONFIGURATION
+
+- name: "Configure... creating a custom profile in /etc/lynis/custom.prf"
+  file:
+   path: "/etc/lynis/custom.prf"
+   state: touch
+   mode: 0600
+   owner: root
+  tags: LYNIS
+
+- name: "Configure... running lynis configure to setup license and upload host"
+  command: "lynis configure settings license-key={{lynis_license_key}}:upload-server=portal.cisofy.com"
+  register: lynis_configured
+  tags: LYNIS
+
+### CRONJOB
+- import_tasks: cronjob.yml
+
+
+### RUN system audit
+- name: "LYNIS.... performing a system scan and upload the data to portal.cisofy.com with options: {{lynis_options}}"
+  command: "lynis audit system {{lynis_options}}"
+  register: lynis_run
+  tags: LYNIS
+ 
+ 

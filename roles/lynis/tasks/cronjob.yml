@@ -1,0 +1,42 @@
+### CRONJOB 
+- name: "Configure... install cronjob?"
+  file:
+   path: "{{lynis_cronjob_dir}}"
+   state: directory
+   mode: 0700
+  when: lynis_cronjob == true and (lynis_cronjob_running == "daily" or lynis_cronjob_running == "monthly" or lynis_cronjob_running == "weekly" or lynis_cronjob_running == "hourly" or lynis_cronjob_running == "reboot" or lynis_cronjob_running == "yearly" or lynis_cronjob_running == "annually")
+  register: lynis_cronjob_installation  
+
+- name: "Configure... removing installed cronjob" 
+  cron:
+   name: "Lynis cronjob"
+   state: absent
+   cron_file: "lynis"
+  when: lynis_cronjob_installation is not defined
+
+
+- name: "Configure... prep cronjob {{lynis_cronjob_dir}}/{{lynis_cronjob_file}}"
+  template: 
+   src: lynis_cronjob.j2
+   dest: "{{lynis_cronjob_dir}}/{{lynis_cronjob_file}}"
+   mode: 0700
+   owner: root
+  when: lynis_cronjob_installation is defined
+
+
+- name: "Configure... creating cronjob log-dir in {{lynis_cronjob_log_dir}}" 
+  file:
+   path: "{{lynis_cronjob_log_dir}}"
+   state: directory
+   mode: 0700
+  when: lynis_cronjob_installation is defined  
+  
+- name: "Configure... installing cronjob: lynis_cronjob_file" 
+  cron:
+   name: "Lynis cronjob"
+   state: present
+   user: root
+   special_time: "{{lynis_cronjob_running}}"
+   job: "{{lynis_cronjob_dir}}/{{lynis_cronjob_file}}"
+   cron_file: "{{lynis_cronjob_file}}"
+  when: lynis_cronjob_installation is defined

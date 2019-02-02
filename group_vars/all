@@ -1,0 +1,25 @@
+---
+# Variables listed here are applicable to all host groups
+
+## Enterprise License key. Go to cisofy.com for a trial 
+lynis_license_key: HLEM1337
+
+## APT/Install settings
+lynis_reset_repo: true
+
+## LYNIS run options
+lynis_options: "--upload"
+
+## CRONJOB Settings
+lynis_cronjob: true
+lynis_cronjob_dir:  "/opt/lynis/cronjobs"
+lynis_cronjob_file: "lynis_cronjob"
+lynis_cronjob_options: "--cronjob --upload"
+lynis_cronjob_running: daily 					#daily #hourly | weekly | monthly (choose one)
+lynis_cronjob_log_dir:  "/var/log/lynis/" 
+
+## MISC Settings, change if you want but prob. u will delete the internet!
+lynis_main_package_name: lynis
+lynis_plugin_package_name: lynis-plugins
+lynis_log_dir: "/var/log/lynis"
+lynis_bin_location: "/usr/sbin"
