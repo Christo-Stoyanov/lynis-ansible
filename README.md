@@ -1,6 +1,6 @@
 # Simple Lynis Deployment
 
-A simple Lynis deployment Playbook using Ansible. It can be run on a single node or multiple nodes.
+A simple [Lynis](https://cisofy.com/solutions/#security-tools) deployment Playbook using Ansible. It can be run on a single node or multiple nodes.
 
 ## Getting Started
 
